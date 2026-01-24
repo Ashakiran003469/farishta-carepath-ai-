@@ -38,7 +38,7 @@ const AISymptomsChecker = () => {
       try {
         dispatch(setLoading(true));
         const res = await fetch(
-          `http://localhost:3001/api/patient/symptoms/${userId}`,
+          `https://farishtaa.onrender.com/api/patient/symptoms/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -122,7 +122,7 @@ const AISymptomsChecker = () => {
       dispatch(addMessage({ role: "patient", content: text }));
 
       const res = await fetch(
-        `http://localhost:3001/api/patient/symptoms/${userId}`,
+        `https://farishtaa.onrender.com/api/patient/symptoms/${userId}`,
         {
           method: "POST",
           headers: {

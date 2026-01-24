@@ -25,7 +25,7 @@ const DoctorByCategory = () => {
       try {
         const pos = await getPosition();
         const res = await fetch(
-          `http://localhost:3001/api/doctor/nearby-search/${category}`,
+          `https://farishtaa.onrender.com/api/doctor/nearby-search/${category}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

@@ -18,7 +18,7 @@ const DoctorProfile = () => {
     const fetchDoctor = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3001/api/doctor/view-profile/${doctorId}`
+          `https://farishtaa.onrender.com/api/doctor/view-profile/${doctorId}`
         );
         const data = await res.json();
         setDoctor(data.doctor);
@@ -37,7 +37,7 @@ const DoctorProfile = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/doctor/add-review`,
+        `https://farishtaa.onrender.com/api/doctor/add-review`,
         {
           method: "POST",
           headers: {
