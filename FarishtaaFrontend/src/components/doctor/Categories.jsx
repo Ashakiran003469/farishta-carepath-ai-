@@ -36,7 +36,7 @@ const Categories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`https://farishtaa-production.up.railway.app/api/doctor/categories`);
+        const response = await fetch(`http://localhost:3001/api/doctor/categories`);
         const { categories } = await response.json();
 
         if (Array.isArray(categories)) {

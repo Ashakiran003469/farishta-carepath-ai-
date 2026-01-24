@@ -21,7 +21,7 @@ function App() {
           <Routes>
               <Route path="/" element={<HomePage />} />
               </Routes>
-              <main className="flex-grow container mx-auto ">
+              <main className="flex-grow w-full">
                 <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

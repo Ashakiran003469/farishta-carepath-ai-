@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { GiSpeaker } from "react-icons/gi";
+import { FaMicrophone } from "react-icons/fa";
+import { MdArrowBack } from "react-icons/md";
 import {
   addMessage,
   setChat,
@@ -35,7 +38,7 @@ const AISymptomsChecker = () => {
       try {
         dispatch(setLoading(true));
         const res = await fetch(
-          `https://farishtaa-production.up.railway.app/api/patient/symptoms/${userId}`,
+          `http://localhost:3001/api/patient/symptoms/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -119,7 +122,7 @@ const AISymptomsChecker = () => {
       dispatch(addMessage({ role: "patient", content: text }));
 
       const res = await fetch(
-        `https://farishtaa-production.up.railway.app/api/patient/symptoms/${userId}`,
+        `http://localhost:3001/api/patient/symptoms/${userId}`,
         {
           method: "POST",
           headers: {
@@ -129,14 +132,20 @@ const AISymptomsChecker = () => {
           body: JSON.stringify({ userPrompt: text, language }),
         }
       );
-
+   
       const data = await res.json();
+     console.log("AI Response Data:", data);  
       if (data.chats && data.chats.length > 0) {
         dispatch(addMessage(data.chats.at(-1)));
+      }
+      if(res.status===401){
+        alert("Session expired. Please log in again.");
+        navigate("/login");
       }
       promptRef.current.value = "";
     } catch (err) {
       dispatch(setError("Message failed"));
+      navigate("/login");
     } finally {
       dispatch(setLoading(false));
     }
@@ -146,10 +155,20 @@ const AISymptomsChecker = () => {
   return (
     <div className="h-screen flex flex-col bg-[#fafafa]">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3 flex justify-between items-center">
-        <div>
-          <h1 className="font-semibold">AI Symptoms Checker</h1>
-          <p className="text-xs text-gray-500">Not a diagnosis</p>
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center font-sans shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link 
+            to="/" 
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 transition font-semibold"
+          >
+            <MdArrowBack size={20} />
+            <span>Back to Home</span>
+          </Link>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <h1 className="font-bold text-lg text-gray-900">AI Symptoms Checker</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Get instant health insights</p>
         </div>
 
         <button
@@ -158,9 +177,10 @@ const AISymptomsChecker = () => {
             const u = new SpeechSynthesisUtterance("Voice enabled");
             window.speechSynthesis.speak(u);
           }}
-          className="px-3 py-1 bg-red-600 text-white rounded"
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-semibold"
         >
-          🔊 Listen
+          <GiSpeaker size={18} />
+          Listen
         </button>
       </header>
 
@@ -177,11 +197,11 @@ const AISymptomsChecker = () => {
         <button
           type="button"
           onClick={handleMicClick}
-          className={`w-12 h-12 rounded-full ${
+          className={`${
             listening ? "bg-red-200" : "bg-gray-200"
           }`}
         >
-          🎙️
+        <FaMicrophone />   
         </button>
 
         <input

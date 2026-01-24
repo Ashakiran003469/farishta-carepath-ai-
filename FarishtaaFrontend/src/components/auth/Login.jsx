@@ -16,7 +16,7 @@ const Login = () => {
     e.preventDefault();
    
     try {
-      const res = await fetch("https://farishtaa-production.up.railway.app/api/auth/login", {
+      const res = await fetch("http://localhost:3001/api/auth/login", {
         method: "POST",
         headers: {
          "Authorization": `Bearer ${token}`,

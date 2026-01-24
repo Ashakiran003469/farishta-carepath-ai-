@@ -26,14 +26,14 @@ const NavBar = () => {
 
   return (
     <nav className="top-0 z-50 h-15 w-full bg-white shadow-lg shadow-gray-400">
-      <div className="max-w-7xl mx-auto px-6  flex items-center justify-between py-2.5">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-2">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-1">
           <FarishtaaLogo className="w-10 h-10" />
-          <div className="leading-tight">
-            <div className="text-lg font-extrabold text-red-600">फरिश्ता</div>
-            <div className="text-[11px] text-gray-500">Healthcare Companion</div>
+          <div className="leading-tight flex flex-col">
+            <div className="text-lg font-extrabold text-red-600 whitespace-nowrap">फरिश्ता</div>
+            <div className="text-gray-500 text-[10px] sm:text-[11px] whitespace-nowrap">Healthcare Companion</div>
           </div>
         </Link>
 
