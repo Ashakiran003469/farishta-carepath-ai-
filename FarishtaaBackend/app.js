@@ -1,45 +1,49 @@
-
 require('dotenv').config();
 
 const express = require("express");
-const app = express();
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
-const errorController=require('./controllers/errorController');
-const patientRouter=require('./routers/patientRouter');
-const authRouter=require('./routers/authRouter');
-const mongoose=require('mongoose');
-const MONGO_DB_URL=`mongodb+srv://Codaholic:${process.env.MONGO_DB_USERNAME}@${process.env.MONGO_DB_PASSWORD}.hy9pkfk.mongodb.net/symptoms_checker?retryWrites=true&w=majority&appName=root`;
-const cors=require('cors');
-const { isLoggedIn, isPatient } = require('./middleware/auth');
-const doctorRouter = require('./routers/doctorRouter');
+const errorController = require("./controllers/errorController");
+const patientRouter = require("./routers/patientRouter");
+const authRouter = require("./routers/authRouter");
+const doctorRouter = require("./routers/doctorRouter");
+const { isLoggedIn, isPatient } = require("./middleware/auth");
 
-app.use(bodyParser.urlencoded({extended : true}));
+const app = express();
+
+/* -------------------- MIDDLEWARE -------------------- */
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 app.use(cors());
+
 app.use((req, res, next) => {
-  console.log("Request Recieved", req.url, req.method, req.body);
+  console.log("Request Received:", req.method, req.url);
   next();
 });
 
-app.use('/api/auth',authRouter);
-app.use('/api/patient',isLoggedIn,isPatient,patientRouter);
-app.use('/api/doctor',doctorRouter);
+/* -------------------- ROUTES -------------------- */
+app.use("/api/auth", authRouter);
+app.use("/api/patient", isLoggedIn, isPatient, patientRouter);
+app.use("/api/doctor", doctorRouter);
 
-const PORT = process.env.PORT || 3001;
-
-
-
+/* -------------------- ERROR HANDLER -------------------- */
 app.use(errorController.getError);
 
-mongoose.connect(MONGO_DB_URL).then(() => {
-app.listen(PORT, () => {
-  console.log(`Server running at : http://localhost:${PORT}/`);
-});
-})
+/* -------------------- SERVER + DB -------------------- */
+const PORT = process.env.PORT || 3001;
 
+// ✅ MongoDB connection using ENV
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB Connected Successfully");
 
-
-
-
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err.message);
+  });
