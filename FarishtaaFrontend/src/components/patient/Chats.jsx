@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 
 const Chats = () => {
+  const { t } = useTranslation();
   const { chatHistory } = useSelector((state) => state.patient);
   const bottomRef = useRef(null);
 
@@ -12,8 +14,8 @@ const Chats = () => {
   }, [chatHistory]);
 
   return (
-    <div className="w-full h-[80vh] bg-[#f9fafb] overflow-y-auto px-4 py-6 rounded-xl">
-      <div className="max-w-4xl mx-auto flex flex-col gap-5">
+    <div className="w-full h-full overflow-y-auto px-2 sm:px-4 py-4 sm:py-6">
+      <div className="max-w-3xl mx-auto flex flex-col gap-3 sm:gap-4">
         {chatHistory?.map((msg, index) => {
           const isPatient = msg.role?.toLowerCase() === "patient";
 
@@ -25,24 +27,27 @@ const Chats = () => {
           return (
             <div
               key={msg._id || index}
-              className={`flex ${isPatient ? "justify-end" : "justify-start"}`}
+              className={`flex ${isPatient ? "justify-end" : "justify-start"} animate-[fadeIn_0.3s_ease-out]`}
             >
-              <div className="flex gap-3 max-w-[85%]">
+              <div className={`flex gap-1.5 sm:gap-2.5 ${isPatient ? "flex-row-reverse" : ""} max-w-[90%] sm:max-w-[80%]`}>
                 
                 {/* Avatar */}
-                {!isPatient && (
-                  <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
-                    AI
-                  </div>
-                )}
+                <div
+                  className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-xs font-bold flex-shrink-0 mt-0.5 ${
+                    isPatient
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                      : "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm"
+                  }`}
+                >
+                  {isPatient ? t('ai.you') : "F"}
+                </div>
 
                 {/* Bubble */}
                 <div
-                  className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm
-                  ${
+                  className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm leading-relaxed ${
                     isPatient
-                      ? "bg-red-600 text-white rounded-br-md"
-                      : "bg-white text-gray-800 border border-gray-200 rounded-bl-md"
+                      ? "bg-red-600 text-white rounded-2xl rounded-tr-md shadow-sm"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-2xl rounded-tl-md border border-gray-100 dark:border-gray-700 shadow-sm"
                   }`}
                 >
                   <ReactMarkdown
@@ -51,26 +56,29 @@ const Chats = () => {
                         <p className="mb-2 last:mb-0">{children}</p>
                       ),
                       ul: ({ children }) => (
-                        <ul className="list-disc ml-5 mb-2">{children}</ul>
+                        <ul className="list-disc ml-5 mb-2 space-y-1">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal ml-5 mb-2 space-y-1">{children}</ol>
                       ),
                       li: ({ children }) => (
-                        <li className="mb-1">{children}</li>
+                        <li className="leading-relaxed">{children}</li>
                       ),
                       strong: ({ children }) => (
-                        <strong className="font-semibold">{children}</strong>
+                        <strong className={`font-semibold ${isPatient ? "" : "text-gray-900 dark:text-white"}`}>
+                          {children}
+                        </strong>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className={`font-bold text-base mb-1 ${isPatient ? "" : "text-gray-800 dark:text-gray-100"}`}>
+                          {children}
+                        </h3>
                       ),
                     }}
                   >
                     {content}
                   </ReactMarkdown>
                 </div>
-
-                {/* Patient Avatar */}
-                {isPatient && (
-                  <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-sm font-semibold text-red-600">
-                    You
-                  </div>
-                )}
               </div>
             </div>
           );
