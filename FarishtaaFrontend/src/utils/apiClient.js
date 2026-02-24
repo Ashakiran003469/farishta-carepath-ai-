@@ -1,5 +1,5 @@
 import store from "../store/index.js";
-import { setUnauthorized } from "../store/slices/authSlice.js";
+import { setUnauthorized } from "../store/slices/authSlice";
 
 export const handleApiResponse = async (response) => {
   if (response.status === 401) {

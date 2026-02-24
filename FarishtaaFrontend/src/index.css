@@ -1,4 +1,16 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Hide scrollbar but keep scroll functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
 .theme-bg{
   font-family: "Times New Roman";
   font-optical-sizing: auto;
@@ -7,6 +19,13 @@
     to bottom,
      #fee2e2,
       #fc8181
+  );
+}
 
+.dark .theme-bg {
+  background: linear-gradient(
+    to bottom,
+    #1f2937,
+    #111827
   );
 }

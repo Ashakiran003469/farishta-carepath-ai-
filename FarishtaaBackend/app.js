@@ -9,7 +9,8 @@ const errorController = require("./controllers/errorController");
 const patientRouter = require("./routers/patientRouter");
 const authRouter = require("./routers/authRouter");
 const doctorRouter = require("./routers/doctorRouter");
-const { isLoggedIn, isPatient } = require("./middleware/auth");
+const doctorDashboardRouter = require("./routers/doctorDashboardRouter");
+const { isLoggedIn, isPatient, isDoctor } = require("./middleware/auth");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRouter);
 app.use("/api/patient", isLoggedIn, isPatient, patientRouter);
 app.use("/api/doctor", doctorRouter);
+app.use("/api/doctor-dashboard", isLoggedIn, isDoctor, doctorDashboardRouter);
 
 /* -------------------- ERROR HANDLER -------------------- */
 app.use(errorController.getError);
@@ -36,7 +38,7 @@ const PORT = process.env.PORT || 3001;
 
 // ✅ MongoDB connection using ENV
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_DB_DATABASE)
   .then(() => {
     console.log("✅ MongoDB Connected Successfully");
 

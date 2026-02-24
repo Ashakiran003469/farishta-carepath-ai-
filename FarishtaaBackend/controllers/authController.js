@@ -43,7 +43,7 @@ exports.postLogin=async (req,res,next)=>{
 
         const token=jwt.sign({userId : user._id , userType : user.userType},process.env.JWT_SECRET,{expiresIn : "1h"});
 
-        res.status(200).json({token ,userType : user.userType , userId : user._id});
+        res.status(200).json({token ,userType : user.userType , userId : user._id, firstName : user.firstName});
     }catch(error){
          res.status(500).json({errorMessages : [error.message]});
     }

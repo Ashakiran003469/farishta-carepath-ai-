@@ -1,6 +1,7 @@
 const Doctor=require('../model/Doctor');
 const Hospital = require('../model/Hospital');
 const Reviews = require('../model/Reviews');
+const User = require('../model/User');
 const specialistsName=require('../utils/specialistsName');
 
 exports.postAddDoctor=async (req,res,next)=>{
@@ -18,7 +19,8 @@ try{
     
     const doctorcategories=await Doctor.distinct("specialist");
     const hospitalcategories=await Hospital.distinct('specialists');
-    const categories=[...new Set([...doctorcategories,...hospitalcategories])];
+    const userDoctorCategories=await User.distinct("specialist", { userType: "Doctor", profileCompleted: true, specialist: { $ne: null } });
+    const categories=[...new Set([...doctorcategories,...hospitalcategories,...userDoctorCategories])];
     return res.status(200).json({categories});
 }
 catch(error){
@@ -35,7 +37,8 @@ exports.searchNearbyBySpecialist=async (req,res,next)=>{
 const specialist=category;
 const doctorsNearby=await findDoctorsNearby(lat,lng,specialist,radius);
 const hospitalsNearby=await findHospitalsNearby(lat,lng,specialist,radius);
-const storedResults=[...doctorsNearby,...hospitalsNearby];
+const userDoctorsNearby=await findUserDoctorsNearby(lat,lng,specialist,radius);
+const storedResults=[...doctorsNearby,...hospitalsNearby,...userDoctorsNearby];
  res.status(200).json({data : storedResults});
  
 loadFromOsm(lat,lng,radius);
@@ -59,6 +62,35 @@ location : {
     },
 }
 })
+}
+
+const findUserDoctorsNearby=async (lat,lng,specialist,radius)=>{
+  const users = await User.find({
+    userType: "Doctor",
+    profileCompleted: true,
+    specialist: { $regex: new RegExp(specialist, "i") },
+    location: {
+      $near: {
+        $geometry: { type: "Point", coordinates: [lng, lat] },
+        $maxDistance: radius,
+      },
+    },
+  }, 'firstName lastName specialist experience degree languages address about photoUrl location doctorReviews');
+  // Map to match Doctor model shape so frontend works seamlessly
+  return users.map(u => ({
+    _id: u._id,
+    name: `${u.firstName} ${u.lastName}`,
+    specialist: u.specialist,
+    experience: u.experience,
+    degree: u.degree,
+    languages: u.languages,
+    address: u.address,
+    about: u.about,
+    photoUrl: u.photoUrl,
+    location: u.location,
+    reviews: u.doctorReviews,
+    _isUserDoctor: true,
+  }));
 }
 const loadFromOsm = async (lat, lng, radius) => {
   try {
@@ -156,24 +188,62 @@ const findHospitalsNearby=(lat,lng,specialist,radius)=>{
 exports.postAddReview=async (req,res,next)=>{
     const {doctorId,patientId,rating,review}=req.body;
 try{
-let newreview=new Reviews({
-    targetId : doctorId,
-    targetModel : "Hospital",
-    patientId,rating,review
-});
+  // Determine which model the doctor belongs to
+  let targetModel = null;
+  let targetDoc = null;
 
-newreview.populate({
-    path : 'patientId',
-    select : "firstName lastName"
-});
+  targetDoc = await Doctor.findById(doctorId);
+  if (targetDoc) {
+    targetModel = "Doctor";
+  } else {
+    targetDoc = await Hospital.findById(doctorId);
+    if (targetDoc) {
+      targetModel = "Hospital";
+    } else {
+      targetDoc = await User.findOne({ _id: doctorId, userType: "Doctor" });
+      if (targetDoc) {
+        targetModel = "Doctor"; // stored as Doctor type in review
+      }
+    }
+  }
 
-await newreview.save();
-const hospital=await Hospital.findById(doctorId);
-hospital.reviews.push(newreview._id);
-await hospital.save();
-return res.status(201).json({message : "Review Created" , newreview});
-}catch(error){
-res.status(400).json({ message : "Error creating review",error});
+  if (!targetDoc) {
+    return res.status(404).json({ message: "Doctor not found" });
+  }
+
+  let newreview = new Reviews({
+    targetId: doctorId,
+    targetModel,
+    patientId,
+    rating,
+    review,
+  });
+
+  await newreview.save();
+
+  await newreview.populate({
+    path: "patientId",
+    select: "firstName lastName",
+  });
+
+  // Push review to the correct collection
+  if (targetModel === "Hospital") {
+    targetDoc.reviews.push(newreview._id);
+    await targetDoc.save();
+  } else if (targetDoc.doctorReviews) {
+    // User-model doctor
+    targetDoc.doctorReviews.push(newreview._id);
+    await targetDoc.save();
+  } else {
+    // Doctor-model doctor
+    targetDoc.reviews.push(newreview._id);
+    await targetDoc.save();
+  }
+
+  return res.status(201).json({ message: "Review Created", newreview });
+} catch (error) {
+  console.error("Review error:", error);
+  res.status(400).json({ message: "Error creating review", error: error.message });
 }
 }
 
@@ -201,6 +271,26 @@ exports.getDoctorById=async (req,res,next)=>{
             }
             });
 
+          }
+          if(!details){
+            // Also check User model for registered doctors
+            const userDoc = await User.findOne({ _id: doctorId, userType: "Doctor", profileCompleted: true })
+              .populate({ path: 'doctorReviews', select: 'rating review createdAt', populate: { path: 'patientId', select: 'firstName lastName' } });
+            if(userDoc) {
+              details = {
+                _id: userDoc._id,
+                name: `${userDoc.firstName} ${userDoc.lastName}`,
+                specialist: userDoc.specialist,
+                experience: userDoc.experience,
+                degree: userDoc.degree,
+                languages: userDoc.languages,
+                address: userDoc.address,
+                about: userDoc.about,
+                photoUrl: userDoc.photoUrl,
+                location: userDoc.location,
+                reviews: userDoc.doctorReviews,
+              };
+            }
           }
           if(!details){
           return res.status(404).json({error : "Doctor Not Found"});

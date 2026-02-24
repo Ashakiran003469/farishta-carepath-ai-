@@ -1,4 +1,4 @@
-import {GoogleGenAI} from "@google/genai";
+const {GoogleGenAI} = require("@google/genai");
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -8,7 +8,7 @@ const createMessagesString = (messages) => {
 
 const SYSTEM_PROMPT = {
   role: 'system',
-  content: `You are a medical symptom checker assistant. 
+  content: `You are a medical symptom checker assistant called "Farishtaa AI". 
 Do not hallucinate. 
 Rules : 
 1.Extract symptoms accurately
@@ -34,8 +34,36 @@ You will recommend categories like this
 `
 };
 
-export async function generateContent(language, userPrompt, messages = []) {
+function buildSystemPrompt(userContext) {
+  if (!userContext) return SYSTEM_PROMPT;
+  
+  const details = [];
+  if (userContext.firstName) details.push(`Name: ${userContext.firstName} ${userContext.lastName || ''}`.trim());
+  if (userContext.age) details.push(`Age: ${userContext.age} years old`);
+  if (userContext.gender) details.push(`Gender: ${userContext.gender}`);
+  
+  if (details.length === 0) return SYSTEM_PROMPT;
+  
+  return {
+    role: 'system',
+    content: `${SYSTEM_PROMPT.content}
+
+--- PATIENT CONTEXT ---
+The patient you are talking to has the following details:
+${details.join('\n')}
+
+Use their name naturally in conversation to make it more personal (e.g. greet them by name).
+Consider their age and gender when assessing symptoms and recommendations.
+For example, if the patient is a child, adjust your language accordingly.
+If the patient is elderly, consider age-related conditions.
+If female, consider gender-specific conditions when relevant.
+--- END PATIENT CONTEXT ---`
+  };
+}
+
+async function generateContent(language, userPrompt, messages = [], userContext = null) {
   try {
+    const systemPrompt = buildSystemPrompt(userContext);
     const recentChat = messages.map((m) => ({
       role: m.role === 'patient' ? 'user' : 'assistant',
       content: m.content,
@@ -51,7 +79,7 @@ export async function generateContent(language, userPrompt, messages = []) {
       content: `Please respond in ${language} language.`,
     };
 
-    const finalMessages = [SYSTEM_PROMPT, ...recentChat, newPrompt, languageToFollow];
+    const finalMessages = [systemPrompt, ...recentChat, newPrompt, languageToFollow];
     const newMessageList = createMessagesString(finalMessages);
 
     const result = await ai.models.generateContent({
@@ -66,5 +94,7 @@ export async function generateContent(language, userPrompt, messages = []) {
     throw err;
   }
 }
+
+module.exports = { generateContent };
 
 
