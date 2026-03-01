@@ -30,12 +30,9 @@ function App() {
       <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
         <NavBar />
 
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-        </Routes>
-
         <main className="flex-grow w-full dark:bg-gray-900">
           <Routes>
+            <Route path="/" element={<HomePage />} />
             <Route path="/login" element={authRedirect ? <Navigate to={authRedirect} replace /> : <Login />} />
             <Route path="/signup" element={authRedirect ? <Navigate to={authRedirect} replace /> : <Signup />} />
 

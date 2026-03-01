@@ -31,6 +31,10 @@ const ChatSidebar = () => {
           `http://localhost:3001/api/patient/sessions/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        if (!res.ok) {
+          if (res.status === 401) navigate("/login");
+          return;
+        }
         const data = await res.json();
         dispatch(setSessions(data.sessions || []));
       } catch (err) {
@@ -54,7 +58,12 @@ const ChatSidebar = () => {
           },
         }
       );
+      if (!res.ok) {
+        if (res.status === 401) navigate("/login");
+        return;
+      }
       const data = await res.json();
+      if (!data.session?._id) return;
       dispatch(addSession(data.session));
       dispatch(setActiveSession(data.session._id));
       dispatch(clearChat());

@@ -160,7 +160,16 @@ const AISymptomsChecker = () => {
           },
         }
       );
+      if (!res.ok) {
+        console.error("Failed to create session: HTTP", res.status);
+        if (res.status === 401) navigate("/login");
+        return null;
+      }
       const data = await res.json();
+      if (!data.session?._id) {
+        console.error("Invalid session response", data);
+        return null;
+      }
       dispatch(addSession(data.session));
       dispatch(setActiveSession(data.session._id));
       navigate(`/symptoms/${userId}/${data.session._id}`, { replace: true });
