@@ -25,6 +25,7 @@ const NavBar = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isDoctor = userType === 'Doctor';
+  const isHospital = userType === 'Hospital';
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
@@ -56,7 +57,7 @@ const NavBar = () => {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-1">
-          {!isDoctor && (
+          {!isDoctor && !isHospital && (
             <Link
               to="/"
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
@@ -65,7 +66,14 @@ const NavBar = () => {
             </Link>
           )}
 
-          {isDoctor ? (
+          {isHospital ? (
+            <Link
+              to="/hospital-dashboard"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+            >
+              <MdDashboard size={16} /> {t('nav.dashboard')}
+            </Link>
+          ) : isDoctor ? (
             <Link
               to="/doctor-dashboard"
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
@@ -81,7 +89,7 @@ const NavBar = () => {
             </Link>
           )}
 
-          {isLoggedIn && !isDoctor && (
+          {isLoggedIn && !isDoctor && !isHospital && (
             <Link
               to={`/symptoms/${userId}`}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
@@ -127,7 +135,7 @@ const NavBar = () => {
           ) : (
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center text-xs sm:text-sm font-bold shadow-sm">
-                {userType === 'Doctor' ? 'D' : 'P'}
+                {userType === 'Doctor' ? 'D' : userType === 'Hospital' ? 'H' : 'P'}
               </div>
               <button
                 onClick={handleLogout}
@@ -144,7 +152,7 @@ const NavBar = () => {
       {/* Mobile dropdown menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 pb-4 pt-2 space-y-1 shadow-lg">
-          {!isDoctor && (
+          {!isDoctor && !isHospital && (
             <Link
               to="/"
               onClick={() => setMobileOpen(false)}
@@ -154,7 +162,15 @@ const NavBar = () => {
             </Link>
           )}
 
-          {isDoctor ? (
+          {isHospital ? (
+            <Link
+              to="/hospital-dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+            >
+              <MdDashboard size={16} /> {t('nav.dashboard')}
+            </Link>
+          ) : isDoctor ? (
             <Link
               to="/doctor-dashboard"
               onClick={() => setMobileOpen(false)}
@@ -172,7 +188,7 @@ const NavBar = () => {
             </Link>
           )}
 
-          {isLoggedIn && !isDoctor && (
+          {isLoggedIn && !isDoctor && !isHospital && (
             <Link
               to={`/symptoms/${userId}`}
               onClick={() => setMobileOpen(false)}

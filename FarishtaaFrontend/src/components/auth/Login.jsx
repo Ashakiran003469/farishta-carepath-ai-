@@ -35,6 +35,8 @@ const Login = () => {
         dispatch(login(data));
         if (data.userType === 'Doctor') {
           navigate('/doctor-dashboard');
+        } else if (data.userType === 'Hospital') {
+          navigate('/hospital-dashboard');
         } else {
           navigate('/');
         }

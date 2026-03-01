@@ -9,6 +9,7 @@ const Signup = () => {
   const emailref = useRef();
   const passwordref = useRef();
   const ageref = useRef();
+  const hospitalNameRef = useRef();
   const navigate=useNavigate();
   const { t } = useTranslation();
 
@@ -28,9 +29,10 @@ const Signup = () => {
             lastName : lastNameref.current.value,
             email : emailref.current.value,
             password : passwordref.current.value,
-            age : ageref.current.value,
-            gender : gender,
+            age : userType !== 'Hospital' ? ageref.current?.value : undefined,
+            gender : userType !== 'Hospital' ? gender : undefined,
             userType : userType,
+            hospitalName : userType === 'Hospital' ? hospitalNameRef.current?.value : undefined,
         })
   }
     );
@@ -127,47 +129,71 @@ const Signup = () => {
       placeholder={t('auth.passwordPlaceholder')}
     />
 
-    {/* Age */}
-    <label className="block mt-4 text-sm font-medium text-red-700 dark:text-red-400">
-      {t('auth.age')}
-    </label>
-    <input
-      type="number"
-      ref={ageref}
-      className="w-full mt-1 p-2 border border-red-300 dark:border-gray-600 rounded-lg
-                 focus:ring-2 focus:ring-red-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
-      placeholder={t('auth.agePlaceholder')}
-    />
+    {/* Age — hide for Hospital */}
+    {userType !== 'Hospital' && (
+      <>
+        <label className="block mt-4 text-sm font-medium text-red-700 dark:text-red-400">
+          {t('auth.age')}
+        </label>
+        <input
+          type="number"
+          ref={ageref}
+          className="w-full mt-1 p-2 border border-red-300 dark:border-gray-600 rounded-lg
+                     focus:ring-2 focus:ring-red-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
+          placeholder={t('auth.agePlaceholder')}
+        />
+      </>
+    )}
 
-    {/* Gender */}
-    <label className="block mt-5 mb-2 text-sm font-medium text-red-700 dark:text-red-400">
-      {t('auth.gender')}
-    </label>
-    <div className="flex flex-wrap gap-2 sm:gap-3 mb-4">
-      {[{val: "Male", label: t('auth.male')}, {val: "Female", label: t('auth.female')}, {val: "Others", label: t('auth.others')}].map((g) => (
-        <button
-          key={g.val}
-          type="button"
-          onClick={() => setGender(g.val)}
-          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full border transition text-xs sm:text-sm
-          ${
-            gender === g.val
-              ? "border-red-600 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-              : "border-red-300 dark:border-gray-600 text-red-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-gray-700"
-          }
-        `}
-        >
-          {g.label}
-        </button>
-      ))}
-    </div>
+    {/* Gender — hide for Hospital */}
+    {userType !== 'Hospital' && (
+      <>
+        <label className="block mt-5 mb-2 text-sm font-medium text-red-700 dark:text-red-400">
+          {t('auth.gender')}
+        </label>
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-4">
+          {[{val: "Male", label: t('auth.male')}, {val: "Female", label: t('auth.female')}, {val: "Others", label: t('auth.others')}].map((g) => (
+            <button
+              key={g.val}
+              type="button"
+              onClick={() => setGender(g.val)}
+              className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full border transition text-xs sm:text-sm
+              ${
+                gender === g.val
+                  ? "border-red-600 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                  : "border-red-300 dark:border-gray-600 text-red-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-gray-700"
+              }
+            `}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+      </>
+    )}
+
+    {/* Hospital Name — show only for Hospital */}
+    {userType === 'Hospital' && (
+      <>
+        <label className="block mt-4 text-sm font-medium text-red-700 dark:text-red-400">
+          Hospital Name
+        </label>
+        <input
+          type="text"
+          ref={hospitalNameRef}
+          className="w-full mt-1 p-2 border border-red-300 dark:border-gray-600 rounded-lg
+                     focus:ring-2 focus:ring-red-500 outline-none bg-white dark:bg-gray-700 dark:text-white"
+          placeholder="Enter hospital name"
+        />
+      </>
+    )}
 
     {/* User Type */}
     <label className="block mb-2 text-sm font-medium text-red-700 dark:text-red-400">
       {t('auth.userType')}
     </label>
     <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
-      {[{val: "Patient", label: t('auth.patient')}, {val: "Doctor", label: t('auth.doctor')}].map((u) => (
+      {[{val: "Patient", label: t('auth.patient')}, {val: "Doctor", label: t('auth.doctor')}, {val: "Hospital", label: "Hospital"}].map((u) => (
         <button
           key={u.val}
           type="button"
