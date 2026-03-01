@@ -15,11 +15,17 @@ import DoctorDashboard from "./components/doctor/dashboard/DoctorDashboard.jsx";
 import DoctorProfileEdit from "./components/doctor/dashboard/DoctorProfileEdit.jsx";
 import DoctorReviews from "./components/doctor/dashboard/DoctorReviews.jsx";
 import DoctorSettings from "./components/doctor/dashboard/DoctorSettings.jsx";
+import HospitalLayout from "./components/hospital/dashboard/HospitalLayout.jsx";
+import HospitalDashboard from "./components/hospital/dashboard/HospitalDashboard.jsx";
+import HospitalDoctors from "./components/hospital/dashboard/HospitalDoctors.jsx";
+import AddDoctor from "./components/hospital/dashboard/AddDoctor.jsx";
+import HospitalDoctorDetail from "./components/hospital/dashboard/HospitalDoctorDetail.jsx";
+import HospitalSettings from "./components/hospital/dashboard/HospitalSettings.jsx";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
   const { isLoggedIn, userType } = useSelector((state) => state.auth);
-  const authRedirect = isLoggedIn ? (userType === 'Doctor' ? '/doctor-dashboard' : '/') : null;
+  const authRedirect = isLoggedIn ? (userType === 'Doctor' ? '/doctor-dashboard' : userType === 'Hospital' ? '/hospital-dashboard' : '/') : null;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -29,13 +35,11 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
         <NavBar />
-
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-        </Routes>
+        <FloatingAIButton />
 
         <main className="flex-grow w-full dark:bg-gray-900">
           <Routes>
+            <Route path="/" element={<HomePage />} />
             <Route path="/login" element={authRedirect ? <Navigate to={authRedirect} replace /> : <Login />} />
             <Route path="/signup" element={authRedirect ? <Navigate to={authRedirect} replace /> : <Signup />} />
 
@@ -52,6 +56,15 @@ function App() {
               <Route path="profile" element={<DoctorProfileEdit />} />
               <Route path="reviews" element={<DoctorReviews />} />
               <Route path="settings" element={<DoctorSettings />} />
+            </Route>
+
+            {/* Hospital dashboard routes */}
+            <Route path="/hospital-dashboard" element={<HospitalLayout />}>
+              <Route index element={<HospitalDashboard />} />
+              <Route path="doctors" element={<HospitalDoctors />} />
+              <Route path="doctors/:doctorId" element={<HospitalDoctorDetail />} />
+              <Route path="add-doctor" element={<AddDoctor />} />
+              <Route path="settings" element={<HospitalSettings />} />
             </Route>
           </Routes>
         </main>

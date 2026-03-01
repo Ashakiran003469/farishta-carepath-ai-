@@ -31,3 +31,9 @@ exports.isDoctor=(req,res,next)=>{
         return res.status(403).json({error : 'Forbidden: Doctor access only'});
     next();
 }
+
+exports.isHospital=(req,res,next)=>{
+    if(req.userType!=='Hospital')
+        return res.status(403).json({error : 'Forbidden: Hospital access only'});
+    next();
+}

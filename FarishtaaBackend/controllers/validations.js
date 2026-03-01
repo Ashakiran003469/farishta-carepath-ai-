@@ -20,7 +20,13 @@ const { check } = require('express-validator');
   exports.emailValidation = check('email')
   .isEmail()
   .withMessage('Please enter a valid email')
-  .normalizeEmail();
+  .normalizeEmail()
+  .custom((value) => {
+    if (!value.endsWith('@gmail.com') && !value.endsWith('@gcekbpatna.ac.in')) {
+      throw new Error('Only @gmail.com and @gcekbpatna.ac.in email addresses are allowed');
+    }
+    return true;
+  });
 
   // Password Validator
   exports.passwordValidation = check('password')

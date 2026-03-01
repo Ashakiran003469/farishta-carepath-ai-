@@ -10,7 +10,8 @@ const patientRouter = require("./routers/patientRouter");
 const authRouter = require("./routers/authRouter");
 const doctorRouter = require("./routers/doctorRouter");
 const doctorDashboardRouter = require("./routers/doctorDashboardRouter");
-const { isLoggedIn, isPatient, isDoctor } = require("./middleware/auth");
+const hospitalDashboardRouter = require("./routers/hospitalDashboardRouter");
+const { isLoggedIn, isPatient, isDoctor, isHospital } = require("./middleware/auth");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/patient", isLoggedIn, isPatient, patientRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/doctor-dashboard", isLoggedIn, isDoctor, doctorDashboardRouter);
+app.use("/api/hospital-dashboard", isLoggedIn, isHospital, hospitalDashboardRouter);
 
 /* -------------------- ERROR HANDLER -------------------- */
 app.use(errorController.getError);
